@@ -522,6 +522,9 @@ class AES:
             hex_state += " ".join([f"{state[i][j]:02x}" for j in range(4)]) + "\n"
         return hex_state
 
+
+# ------------------------------------------------------------------------------------------------
+# Test function for AES encryption and decryption   
 def test_aes_encryption():
     plaintext_hex = "54776F204F6E65204E696E652054776F"  # Example plaintext (in hex)
     
@@ -549,8 +552,9 @@ def test_aes_encryption():
 
 # Run the test
 test_aes_encryption()
+# ------------------------------------------------------------------------------------------------
 
-
+# Main function to generate AES tables and test the AES class   
 def main():
     print("Starting AES table generation...")
     generate()  # Generate the S-box and related tables
