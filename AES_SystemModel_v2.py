@@ -462,8 +462,12 @@ class AES:
 
     
     def decrypt(self, ciphertext_hex):
+        print(ciphertext_hex)
+        new_cipher_text = AES.matrix_to_hex_string_by_column(ciphertext_hex)
+        print(new_cipher_text)
+
         print("Starting decryption...")
-        state = self.hex_to_state(ciphertext_hex)
+        state = self.hex_to_state(new_cipher_text)
         print("State after hex to state conversion (hex):")
         print(self.state_to_hex(state))
     
@@ -473,30 +477,40 @@ class AES:
     
         for round in range(9, 0, -1):
             print(f"Round {round} (decryption)...")
-            state = SubBytes.inv_sub_bytes(state, self.inv_sbox)
-            print(f"State after inv_SubBytes in round {round} (hex):")
-            print(self.state_to_hex(state))
-            
+
+
+            # Inv Shift Rows
             state = ShiftRows.inv_shift_rows(state)
             print(f"State after inv_ShiftRows in round {round} (hex):")
             print(self.state_to_hex(state))
-        
-            state = self.inv_mix_columns.inv_mix_columns(state)
-            print(f"State after inv_MixColumns in round {round} (hex):")
+
+            # Inv SubBytes            
+            state = SubBytes.inv_sub_bytes(state, self.inv_sbox)
+            print(f"State after inv_SubBytes in round {round} (hex):")
             print(self.state_to_hex(state))
-        
+
+            # Add Round Key
             state = AddRoundKey.execute(state, self.round_keys[round])
             print(f"State after AddRoundKey in round {round} (hex):")
             print(self.state_to_hex(state))
+        
+            # Inv Mix Columns        
+            state = self.inv_mix_columns.inv_mix_columns(state)
+            print(f"State after inv_MixColumns in round {round} (hex):")
+            print(self.state_to_hex(state))
+
+
     
         # Final round (no inv_MixColumns)
         print("Final round (round 0, decryption)...")
-        state = SubBytes.inv_sub_bytes(state, self.inv_sbox)
-        print("State after inv_SubBytes in final round (hex):")
-        print(self.state_to_hex(state))
+
         
         state = ShiftRows.inv_shift_rows(state)
         print("State after inv_ShiftRows in final round (hex):")
+        print(self.state_to_hex(state))
+
+        state = SubBytes.inv_sub_bytes(state, self.inv_sbox)
+        print("State after inv_SubBytes in final round (hex):")
         print(self.state_to_hex(state))
     
         state = AddRoundKey.execute(state, self.round_keys[0])
@@ -506,8 +520,8 @@ class AES:
         decrypted_hex = self.state_to_hex(state)
         print("Decrypted hex:", decrypted_hex)
     
-        #decrypted_plaintext = pkcs7_unpad(decrypted_hex)
-        #print("Decrypted plaintext (hex after unpadding):", decrypted_plaintext)
+        # decrypted_plaintext = pkcs7_unpad(decrypted_hex)
+        # print("Decrypted plaintext (hex after unpadding):", decrypted_plaintext)
     
         return decrypted_hex
 
@@ -521,8 +535,21 @@ class AES:
         for i in range(4):
             hex_state += " ".join([f"{state[i][j]:02x}" for j in range(4)]) + "\n"
         return hex_state
-
-
+    # @staticmethod
+    def matrix_to_hex_string_by_column(matrix_str):
+        # Split into lines and remove empty lines
+        lines = [line.strip() for line in matrix_str.split('\n') if line.strip()]
+        
+        # Split each line into values
+        matrix = [line.split() for line in lines]
+        
+        # Read column by column and join
+        result = ''
+        for col in range(4):  # For each column
+            for row in range(4):  # For each row
+                result += matrix[row][col]
+                
+        return result
 # ------------------------------------------------------------------------------------------------
 # Test function for AES encryption and decryption   
 def test_aes_encryption():
