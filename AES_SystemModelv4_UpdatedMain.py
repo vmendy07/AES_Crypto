@@ -152,8 +152,8 @@ def generate():
             # The antilog table is used to perform exponentiation in the finite field.
             antilog = [primitive**i for i in range(256)]  # Compute powers of the primitive
 
-            # Initialize the log table, which maps elements of F256 to their logarithms
-            log = [BinPol(0, irreducible_polynomial) for _ in range(256)]  # Initialize with zeroes
+            # Initialise the log table, which maps elements of F256 to their logarithms
+            log = [BinPol(0, irreducible_polynomial) for _ in range(256)]  # Initialise with zeroes
             
             # Build the log table by using the antilog table. The log of an element is its position in the antilog table.
             for i, a in enumerate(antilog):
@@ -216,7 +216,7 @@ class KeyExpansion:  # author: EBranigan
         if len(key_hex) != 32:
             raise ValueError("AES key must be 128 bits (32 hex characters).")
         
-        # Initialize the S-Box (used in SubWord transformation)
+        # Initialise the S-Box (used in SubWord transformation)
         self.sbox = sbox  
         print(f"Initialized S-Box: {self.sbox}")  # Debugging line to confirm S-Box loading
         
@@ -245,7 +245,7 @@ class KeyExpansion:  # author: EBranigan
         Nb = 4  # Number of columns in the AES state (always 4)
         Nr = 10  # Number of encryption rounds for AES-128
 
-        # Initialize the round key array with the initial key (4 words of 4 bytes each)
+        # Initialise the round key array with the initial key (4 words of 4 bytes each)
         W = [[key[4 * i + j] for j in range(4)] for i in range(Nk)]
 
         # Generate the remaining round keys
@@ -276,7 +276,7 @@ class KeyExpansion:  # author: EBranigan
                 print("Invalid key length or characters. Please enter exactly 32 hex characters.")
 
 
-class MixColumns:  # author: EBranigan
+class MixColumns:  # author: E_Saji
     @staticmethod
     def gf_multiply(a, b):
         """Multiply two bytes in GF(2^8) using the AES field polynomial (0x11B).
@@ -500,7 +500,7 @@ class AddRoundKey:  # author: V_Mendy
 #    return padded_hex[:-2*pad_length]
 
 
-class AES:
+class AES: # authors: EBranigan, V_Mendy, E_Saji
     def __init__(self, key_hex):
         """Initialize the AES encryption and decryption process.
         
@@ -517,7 +517,7 @@ class AES:
         self.inv_sbox = invert_sbox(self.sbox)  
         print("Inverse S-Box calculated:", self.inv_sbox)
         
-        # Initialize the KeyExpansion class to generate the round keys
+        # Initialise the KeyExpansion class to generate the round keys
         self.key_expansion = KeyExpansion(key_hex, self.sbox)
         self.round_keys = self.key_expansion.round_keys
         print("Key Expansion complete. Round keys (hex):")
@@ -525,7 +525,7 @@ class AES:
             hex_key = ' '.join([f'{byte:02x}' for byte in key])  # Print round keys in hex
             print(f"Round {i}: {hex_key}")
         
-        # Initialize the MixColumns class (used in encryption and decryption)
+        # Initialise the MixColumns class (used in encryption and decryption)
         self.mix_columns = MixColumns()  
         self.inv_mix_columns = MixColumns()  # Inverse MixColumns uses the same class
         print("MixColumns classes initialized.")
