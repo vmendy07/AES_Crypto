@@ -1,4 +1,4 @@
-# AES_SystemModelv2.py
+# AES_SystemModel.py
 
 # AES
 from flask import Flask, request, jsonify
@@ -854,81 +854,81 @@ class AES:
                 result += matrix[row][col]
                 
         return result
-# ------------------------------------------------------------------------------------------------
-# Test function for AES encryption and decryption   
-def test_aes_encryption():
-    plaintext_hex = "54776F204F6E65204E696E652054776F"  # Example plaintext (in hex)
+# # ------------------------------------------------------------------------------------------------
+# # Test function for AES encryption and decryption   
+# def test_aes_encryption():
+#     plaintext_hex = "54776F204F6E65204E696E652054776F"  # Example plaintext (in hex)
     
-    # Initialize the AES object with a key
-    key_hex = "5468617473206D79204B756E67204675"  # Example key (in hex)
-    aes = AES(key_hex)
-    
-    # Encrypt the plaintext
-    print("Original Plaintext (hex):", plaintext_hex)
-    ciphertext, visualization_data = aes.encrypt(plaintext_hex)
-    print(f"Ciphertext: {ciphertext}")
-
-    # Example of JSON usage for API
-    import json
-    api_response = {
-        "status": "success",
-        "ciphertext": ciphertext,
-        "visualization": visualization_data
-    }
-    
-    # # Decrypt the ciphertext
-    # decrypted_plaintext = aes.decrypt(ciphertext)
-    # print(f"Decrypted Plaintext (hex): {decrypted_plaintext}")
-    
-    # # Check if the decrypted plaintext matches the original plaintext
-    # if decrypted_plaintext != plaintext_hex:
-    #     print("Decryption failed: Decrypted plaintext does not match the original.")
-    #     print("Original Plaintext:", plaintext_hex)
-    #     print("Decrypted Plaintext:", decrypted_plaintext)
-    # else:
-    #     print("Test passed! Decryption matched the original plaintext.")
-
-
-# Run the test
-test_aes_encryption()
-# ------------------------------------------------------------------------------------------------
-
-# # Main function to generate AES tables and test the AES class   
-# def main():
-#     print("Starting AES table generation...")
-#     generate()  # Generate the S-box and related tables
-#     print("AES table generation complete. Check 'AES_base.log' and 'AES_base.py'.")
-
-#     # Import sbox directly from AES_base
-#     from AES_base import sbox
-    
-#     # Calculate the inverse S-box
-#     inv_sbox = invert_sbox(sbox)
-#     print(f"Inverse S-Box: {inv_sbox}")  # Debug print
-
-#     # Prompt the user to enter a 128-bit AES key (32 hex characters)
-#     key_hex = KeyExpansion.user_input_key()  # Receive a hex key from user
-#     print("\nUser-provided key in hex:", key_hex)
-
-#     # Initialize KeyExpansion and generate round keys
-#     key_expansion = KeyExpansion(key_hex, sbox)
-#     round_keys = key_expansion.round_keys
-#     print("\nGenerated Round Keys:")
-#     for i, round_key in enumerate(round_keys):
-#         print(f"Round {i}: {round_key}")
-
-#     # Initialize AES class with the user-provided key
+#     # Initialize the AES object with a key
+#     key_hex = "5468617473206D79204B756E67204675"  # Example key (in hex)
 #     aes = AES(key_hex)
-
-#     # Example usage for encryption and decryption
-#     plaintext_hex = "3243f6a8885a308d313198a2e0370734"  # Example plaintext
-#     ciphertext = aes.encrypt(plaintext_hex)
+    
+#     # Encrypt the plaintext
+#     print("Original Plaintext (hex):", plaintext_hex)
+#     ciphertext, visualization_data = aes.encrypt(plaintext_hex)
 #     print(f"Ciphertext: {ciphertext}")
 
-#     decrypted_plaintext = aes.decrypt(ciphertext)
-#     print(f"Decrypted Plaintext: {decrypted_plaintext}")
+#     # Example of JSON usage for API
+#     import json
+#     api_response = {
+#         "status": "success",
+#         "ciphertext": ciphertext,
+#         "visualization": visualization_data
+#     }
+    
+#     # # Decrypt the ciphertext
+#     # decrypted_plaintext = aes.decrypt(ciphertext)
+#     # print(f"Decrypted Plaintext (hex): {decrypted_plaintext}")
+    
+#     # # Check if the decrypted plaintext matches the original plaintext
+#     # if decrypted_plaintext != plaintext_hex:
+#     #     print("Decryption failed: Decrypted plaintext does not match the original.")
+#     #     print("Original Plaintext:", plaintext_hex)
+#     #     print("Decrypted Plaintext:", decrypted_plaintext)
+#     # else:
+#     #     print("Test passed! Decryption matched the original plaintext.")
 
-# Initialize AES tables when the application starts
+
+# # Run the test
+# test_aes_encryption()
+# # ------------------------------------------------------------------------------------------------
+
+# # # Main function to generate AES tables and test the AES class   
+# # def main():
+# #     print("Starting AES table generation...")
+# #     generate()  # Generate the S-box and related tables
+# #     print("AES table generation complete. Check 'AES_base.log' and 'AES_base.py'.")
+
+# #     # Import sbox directly from AES_base
+# #     from AES_base import sbox
+    
+# #     # Calculate the inverse S-box
+# #     inv_sbox = invert_sbox(sbox)
+# #     print(f"Inverse S-Box: {inv_sbox}")  # Debug print
+
+# #     # Prompt the user to enter a 128-bit AES key (32 hex characters)
+# #     key_hex = KeyExpansion.user_input_key()  # Receive a hex key from user
+# #     print("\nUser-provided key in hex:", key_hex)
+
+# #     # Initialize KeyExpansion and generate round keys
+# #     key_expansion = KeyExpansion(key_hex, sbox)
+# #     round_keys = key_expansion.round_keys
+# #     print("\nGenerated Round Keys:")
+# #     for i, round_key in enumerate(round_keys):
+# #         print(f"Round {i}: {round_key}")
+
+# #     # Initialize AES class with the user-provided key
+# #     aes = AES(key_hex)
+
+# #     # Example usage for encryption and decryption
+# #     plaintext_hex = "3243f6a8885a308d313198a2e0370734"  # Example plaintext
+# #     ciphertext = aes.encrypt(plaintext_hex)
+# #     print(f"Ciphertext: {ciphertext}")
+
+# #     decrypted_plaintext = aes.decrypt(ciphertext)
+# #     print(f"Decrypted Plaintext: {decrypted_plaintext}")
+
+# # Initialize AES tables when the application starts
 def initialize_aes():
     print("Starting AES table generation...")
     generate()  # Generate the S-box and related tables
