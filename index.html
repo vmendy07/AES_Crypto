@@ -1,0 +1,844 @@
+<!-- To run, install liver server extension then right click on index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AESential - Secure Encryption Solution</title>
+    <style>
+        :root {
+            --primary: #4ade80;          /* Soft green */
+            --primary-dim: #22c55e;      /* Muted green */
+            --bg-dark: #0b1221;          /* Darker blue-gray for cyber feel */
+            --bg-darker: #060a14;        /* Even darker background */
+            --text-primary: #f3f4f6;     /* Light gray */
+            --text-secondary: #9ca3af;   /* Medium gray */
+            --card-bg: #131c2f;          /* Card background */
+            --hover-color: #34d399;      /* Bright but not harsh green */
+            --accent: #86efac;           /* Light green for accents */
+            --grid-color: rgba(74, 222, 128, 0.03); /* Very subtle grid lines */
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+            position: relative; /* Added for positioning the light effect */
+        }
+
+        /* Green diffusion light effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vmin;
+            height: 100vmin;
+            background: radial-gradient(
+                circle at center,
+                rgba(74, 222, 128, 0.15) 0%,
+                rgba(74, 222, 128, 0.1) 20%,
+                rgba(74, 222, 128, 0.05) 40%,
+                rgba(74, 222, 128, 0.02) 60%,
+                transparent 70%
+            );
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(40px);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        /* Subtle pulse animation for the light */
+        @keyframes pulse {
+                    0% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 0.8;
+                    }
+                    50% {
+                        transform: translate(-50%, -50%) scale(1.2);
+                        opacity: 0.6;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 0.8;
+                    }
+                }
+        nav {
+            background-color: var(--bg-darker);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Cyber line animation */
+        nav::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: scan-line 4s linear infinite;
+        }
+
+        @keyframes scan-line {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+            position: relative;
+            margin-left: 10rem;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                margin-left: 0;  /* Remove margin on mobile */
+                font-size: 1.25rem;  /* Slightly smaller font size */
+            }
+            
+            nav {
+                padding: 1rem;  /* Reduce padding on mobile */
+                justify-content: center;  /* Center the logo when nav links are hidden */
+            }
+        }
+
+        /* For even smaller screens */
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.1rem;  /* Even smaller font size for very small screens */
+            }
+        }
+        .logo::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+/* Ensure content stays above the light effect */
+        main {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            overflow: hidden;
+        }
+
+        nav {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero::before {
+            z-index: 1;
+            opacity: 0.7;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            position: relative;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: rgba(34, 197, 94, 0.1);
+            color: var(--primary);
+            padding: 0.8rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 1px solid var(--primary-dim);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            background: linear-gradient(45deg, 
+                transparent, rgba(74, 222, 128, 0.1), transparent);
+            animation: border-flow 5s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes border-flow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cta-button:hover {
+            background-color: rgba(34, 197, 94, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 211, 153, 0.2);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(74, 222, 128, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg,
+                transparent 48%,
+                rgba(74, 222, 128, 0.1) 50%,
+                transparent 52%);
+            background-size: 200% 200%;
+            background-position: 100% 100%;
+            transition: all 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            background-position: 0% 0%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(74, 222, 128, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-card h3::before {
+            content: '>';
+            color: var(--primary-dim);
+            font-size: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        footer {
+            background-color: var(--bg-darker);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(74, 222, 128, 0.1);
+            position: relative;
+        }
+
+        /* Matrix-inspired background animation */
+        @keyframes matrix-bg {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center,
+                rgba(74, 222, 128, 0.03) 0%,
+                transparent 50%);
+            animation: matrix-bg 20s linear infinite;
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+         /* New styles for encryption section */
+         .encryption-section {
+            margin-top: 4rem;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(74, 222, 128, 0.1);
+        }
+
+        .encryption-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .encryption-box, .decryption-box {
+            padding: 1rem;
+            background-color: var(--bg-darker);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(74, 222, 128, 0.1);
+        }
+
+        .encryption-box h3, .decryption-box h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            margin-top: 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .input-group textarea,
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-dark);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 0.25rem;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .input-group textarea {
+            min-height: 120px;
+        }
+
+        .input-group textarea:focus,
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
+        }
+
+        .input-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234ade80' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2.5rem;
+        }
+
+        .crypto-button {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--primary-dim);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .crypto-button::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            background: linear-gradient(45deg, 
+                transparent, rgba(74, 222, 128, 0.1), transparent);
+            animation: border-flow 6s linear infinite;
+            z-index: -1;
+        }
+
+        .crypto-button:hover {
+            background-color: rgba(34, 197, 94, 0.2);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .encryption-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Questionmark css */
+
+        .tooltip-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.5rem;
+        }
+
+        .tooltip-icon {
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary-dim);
+            color: var(--bg-darker);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: help;
+            margin-left: 0.5rem;
+        }
+
+        .tooltip-text {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--bg-darker);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            width: max-content;
+            max-width: 250px;
+            border: 1px solid var(--primary-dim);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 10;
+            white-space: pre-line;  /* This preserves the line breaks */
+            text-align: left;       /* This ensures left alignment */
+
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            opacity: 1;
+            visibility: visible;
+            bottom: 130%;
+        }
+
+        /* Add a small arrow to the tooltip */
+        .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--primary-dim) transparent transparent transparent;
+        }
+
+        /* highlight text */
+        .tooltip-text .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .input-group textarea[readonly] {
+            background-color: var(--bg-dark);
+            border: 1px solid rgba(74, 222, 128, 0.1);
+            color: var(--primary);
+            cursor: default;
+        }
+
+        .input-group textarea[readonly]:focus {
+            border-color: rgba(74, 222, 128, 0.2);
+            box-shadow: none;
+        }
+        .output-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .output-container textarea {
+            width: 100%;
+        }
+
+        .copy-button {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary-dim);
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            align-self: flex-end;  /* Aligns button to the right */
+            width: auto;          /* Button width fits content */
+        }
+
+        .copy-button:hover {
+            background-color: rgba(34, 197, 94, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Success state for copy button */
+        .copy-button.success {
+            background-color: var(--primary-dim);
+            color: var(--bg-darker);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">AESential</div>
+        <div class="nav-links">
+            <!-- <a href="#features">Features</a> -->
+            <a href="#docs">Documentation</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>Secure Your Data with AESential</h1>
+            <p>Enterprise-grade encryption made simple. Protect your sensitive information with military-grade AES encryption.</p>
+            <a href="#encryption" class="cta-button">Initialize System<span class="dots"></span></a>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>Advanced Encryption</h3>
+                <p>Industry-standard AES encryption ensuring your data remains secure and private at all times.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Easy Integration</h3>
+                <p>Simple API integration with your existing applications. Get started in minutes, not hours.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Real-time Security</h3>
+                <p>Monitor your encryption status in real-time with our advanced dashboard and analytics.</p>
+            </div>
+        </section>
+        <section class="encryption-section" id="encryption">
+            <div class="encryption-container">
+                <!-- Encryption Box -->
+                <div class="encryption-box">
+                    <h3>Encryption</h3>
+                    <div class="input-group">
+                        <label for="plaintext">
+                            Plain Text
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">Enter the text you want to encrypt. This can be any message or data you want to keep secure.</div>
+                            </div>
+                        </label>
+                        <textarea id="plaintext" placeholder="Enter text to encrypt..."></textarea>
+                    </div>
+        
+                    <div class="input-group">
+                        <label for="enc-mode">
+                            Cipher Mode
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">
+                                    <span class="highlight">CBC</span>: Provides better security with initialization vectors
+                                    <span class="highlight">ECB</span>: Simple but less secure
+                                    <span class="highlight">CFB</span>: Encrypts data in units smaller than block size
+                                    <span class="highlight">OFB</span>: Generates keystream blocks for encryption
+                                    <span class="highlight">CTR</span>: Turns block cipher into stream cipher
+                                </div>
+                            </div>
+                        </label>
+                        <select id="enc-mode">
+                            <option value="CBC">CBC (Cipher Block Chaining)</option>
+                            <option value="ECB">ECB (Electronic Codebook)</option>
+                            <option value="CFB">CFB (Cipher Feedback)</option>
+                            <option value="OFB">OFB (Output Feedback)</option>
+                            <option value="CTR">CTR (Counter)</option>
+                        </select>
+                    </div>
+        
+                    <div class="input-group">
+                        <label for="key-size">
+                            Key Size (bits)
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">
+                                    128-bit: Standard security
+                                    192-bit: Enhanced security
+                                    256-bit: Maximum security (recommended)</div>
+                            </div>
+                        </label>
+                        <select id="key-size">
+                            <option value="128">128 bits</option>
+                            <option value="192">192 bits</option>
+                            <option value="256">256 bits</option>
+                        </select>
+                    </div>
+        
+                    <div class="input-group">
+                        <label for="secret-key">
+                            Secret Key
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">The secret key used for encryption. Must be shared securely with intended recipients for decryption. Keep this private!</div>
+                            </div>
+                        </label>
+                        <input type="password" id="secret-key" placeholder="Enter your secret key...">
+                    </div>
+        
+                    <button class="crypto-button">Encrypt<span class="dots"></span></button>
+                    <!-- For the Encryption box output -->
+                    <div class="input-group">
+                        <label for="encryption-output">
+                            Output
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">The encrypted result will appear here. This is your ciphertext that can be safely shared.</div>
+                            </div>
+                        </label>
+                        <div class="output-container">
+                            <textarea id="encryption-output" placeholder="Encrypted text will appear here..." readonly></textarea>
+                            <button class="copy-button" onclick="copyToClipboard('encryption-output')">
+                                <div class="tooltip-container">
+                                    <div class="tooltip-text">Copy to clipboard</div>
+                                    Copy to Clipboard
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                    
+                </div>
+        
+                <!-- Decryption Box -->
+                <div class="decryption-box">
+                    <h3>Decryption</h3>
+                    <div class="input-group">
+                        <label for="ciphertext">
+                            Cipher Text
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">Enter the encrypted text that you want to decrypt. This should be the output from the encryption process.</div>
+                            </div>
+                        </label>
+                        <textarea id="ciphertext" placeholder="Enter text to decrypt..."></textarea>
+                    </div>
+        
+                    <div class="input-group">
+                        <label for="dec-mode">
+                            Cipher Mode
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">Must match the mode used during encryption. Using a different mode will result in incorrect decryption.</div>
+                            </div>
+                        </label>
+                        <select id="dec-mode">
+                            <option value="CBC">CBC (Cipher Block Chaining)</option>
+                            <option value="ECB">ECB (Electronic Codebook)</option>
+                            <option value="CFB">CFB (Cipher Feedback)</option>
+                            <option value="OFB">OFB (Output Feedback)</option>
+                            <option value="CTR">CTR (Counter)</option>
+                        </select>
+                    </div>
+        
+                    <div class="input-group">
+                        <label for="dec-key-size">
+                            Key Size (bits)
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">Must match the key size used during encryption. Using a different size will result in incorrect decryption.</div>
+                            </div>
+                        </label>
+                        <select id="dec-key-size">
+                            <option value="128">128 bits</option>
+                            <option value="192">192 bits</option>
+                            <option value="256">256 bits</option>
+                        </select>
+                    </div>
+        
+                    <div class="input-group">
+                        <label for="dec-secret-key">
+                            Enter Secret Key used for Encryption
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">Must be exactly the same key used for encryption. Any difference will result in failed decryption.</div>
+                            </div>
+                        </label>
+                        <input type="password" id="dec-secret-key" placeholder="Enter your secret key...">
+                    </div>
+        
+                    <button class="crypto-button">Decrypt<span class="dots"></span></button>
+
+                    <!-- For the Decryption box output -->
+                    <div class="input-group">
+                        <label for="decryption-output">
+                            Output
+                            <div class="tooltip-container">
+                                <div class="tooltip-icon">?</div>
+                                <div class="tooltip-text">The decrypted result will appear here. This is your original plaintext message.</div>
+                            </div>
+                        </label>
+                        <div class="output-container">
+                            <textarea id="decryption-output" placeholder="Decrypted text will appear here..." readonly></textarea>
+                            <button class="copy-button" onclick="copyToClipboard('decryption-output')">
+                                <div class="tooltip-container">
+                                    <div class="tooltip-text">Copy to clipboard</div>
+                                    Copy
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <footer>
+        <p>&copy; 2024 AESential. All rights reserved.</p>
+    </footer>
+
+            <!-- Javascript copy to clipboard script -->
+    <script>
+        function copyToClipboard(elementId) {
+            const textarea = document.getElementById(elementId);
+            const button = textarea.parentElement.nextElementSibling; // Updated selector
+            
+            // Copy the text
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+            
+            // Visual feedback
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('success');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText + '<span class="dots"></span>';
+                button.classList.remove('success');
+            }, 2000);
+        }
+        </script>
+</body>
+</html>

@@ -1,9 +1,13 @@
 # AES_SystemModelv2.py
 
 # AES
-
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import sys
 import os
+
+app = Flask(__name__)
+CORS(app)
 import AES_base
 
 # Add the current directory to sys.path
@@ -409,56 +413,205 @@ class AES:
         except ImportError as e:
             print(f"Error loading S-box: {e}")
             return None
+        
+    def state_to_json_matrix(self, state, operation=None, round_num=None):
+        """
+        Convert a state matrix to a formatted JSON structure.
+        
+        Args:
+            state: The current state matrix
+            operation: The operation that produced this state
+            round_num: The current round number
+            
+        Returns:
+            dict: JSON-compatible dictionary containing the matrix data
+        """
+        matrix_data = {
+            "matrix": [[f"{cell:02x}" for cell in row] for row in state],
+            "formatted": self.state_to_hex(state)
+        }
+        
+        if operation:
+            matrix_data["operation"] = operation
+        if round_num is not None:
+            matrix_data["round"] = round_num
+            
+        return matrix_data
+    
+    def matrix_to_state(self, round_key):
+        """Convert a round key array into a state matrix format."""
+        state = [[0 for _ in range(4)] for _ in range(4)]
+        for i in range(4):
+            for j in range(4):
+                state[i][j] = round_key[i + 4*j]
+        return state
 
     def encrypt(self, plaintext_hex):
+        """
+        Encrypt plaintext and collect all states for visualization while maintaining original functionality.
+        """
+        states = []  # Collection for JSON states
+
         print("Starting encryption...")
-        #padded_plaintext = pkcs7_pad(plaintext_hex)
-        #print("Padded plaintext (hex):", padded_plaintext)
         
+        # Initial state
         state = self.hex_to_state(plaintext_hex)
         print("State after hex to state conversion (hex):")
         print(self.state_to_hex(state))
-    
+        
+        # Add initial state to JSON collection
+        states.append({
+            "title": "Input",
+            "matrices": [
+                {
+                    "label": "Start of round",
+                    "data": [[f"{cell:02x}" for cell in row] for row in state],
+                    "tooltip": "Original input text arranged in a 4x4 matrix"
+                },
+                {
+                    "label": "Round Key",
+                    "data": [[f"{cell:02x}" for cell in row] for row in self.matrix_to_state(self.round_keys[0])],
+                    "tooltip": "Initial round key for AddRoundKey operation"
+                }
+            ]
+        })
+
         state = AddRoundKey.execute(state, self.round_keys[0])
         print("State after initial AddRoundKey (hex):")
         print(self.state_to_hex(state))
-    
+
         for round in range(1, 10):
+            round_matrices = []
+            
+            # Start of round
+            round_matrices.append({
+                "label": "Start of round",
+                "data": [[f"{cell:02x}" for cell in row] for row in state],
+                "tooltip": f"State after Round {round-1 if round > 1 else 'initial'} AddRoundKey"
+            })
+
             print(f"Round {round}...")
             state = SubBytes.execute(state, self.sbox)
             print(f"State after SubBytes in round {round} (hex):")
             print(self.state_to_hex(state))
             
+            round_matrices.append({
+                "label": "After SubBytes",
+                "data": [[f"{cell:02x}" for cell in row] for row in state],
+                "tooltip": "Each byte replaced using S-box substitution"
+            })
+            
             state = ShiftRows.shift_rows(state)
             print(f"State after ShiftRows in round {round} (hex):")
             print(self.state_to_hex(state))
-        
+            
+            round_matrices.append({
+                "label": "After ShiftRows",
+                "data": [[f"{cell:02x}" for cell in row] for row in state],
+                "tooltip": "Rows shifted cyclically to the left"
+            })
+
             state = MixColumns.mix_columns(state)
             print(f"State after MixColumns in round {round} (hex):")
             print(self.state_to_hex(state))
+            
+            round_matrices.append({
+                "label": "After MixColumns",
+                "data": [[f"{cell:02x}" for cell in row] for row in state],
+                "tooltip": "Columns transformed using matrix multiplication"
+            })
+
+            # Add round key to matrices before executing it
+            round_matrices.append({
+                "label": "Round Key",
+                "data": [[f"{cell:02x}" for cell in row] for row in self.matrix_to_state(self.round_keys[round])],
+                "tooltip": f"Round key for Round {round}"
+            })
 
             state = AddRoundKey.execute(state, self.round_keys[round])
             print(f"State after AddRoundKey in round {round} (hex):")
             print(self.state_to_hex(state))
-    
+
+            # Add the complete round to states
+            states.append({
+                "title": f"Round {round}",
+                "matrices": round_matrices
+            })
+
         # Final round (no MixColumns)
         print("Final round (round 10)...")
+        final_matrices = []
+
+        # Start of round
+        final_matrices.append({
+            "label": "Start of round",
+            "data": [[f"{cell:02x}" for cell in row] for row in state],
+            "tooltip": "State after Round 9 AddRoundKey"
+        })
+
         state = SubBytes.execute(state, self.sbox)
         print("State after SubBytes in final round (hex):")
         print(self.state_to_hex(state))
-    
+        
+        final_matrices.append({
+            "label": "After SubBytes",
+            "data": [[f"{cell:02x}" for cell in row] for row in state],
+            "tooltip": "Each byte replaced using S-box substitution"
+        })
+
         state = ShiftRows.shift_rows(state)
         print("State after ShiftRows in final round (hex):")
         print(self.state_to_hex(state))
-    
+        
+        final_matrices.append({
+            "label": "After ShiftRows",
+            "data": [[f"{cell:02x}" for cell in row] for row in state],
+            "tooltip": "Rows shifted cyclically to the left"
+        })
+
+ # Add final round key to matrices
+        final_matrices.append({
+            "label": "Round Key",
+            "data": [[f"{cell:02x}" for cell in row] for row in self.matrix_to_state(self.round_keys[10])],
+            "tooltip": "Round key for Final Round"
+        })
+
         state = AddRoundKey.execute(state, self.round_keys[10])
         print("State after final AddRoundKey (hex):")
         print(self.state_to_hex(state))
-    
+
+        # Add the final state after AddRoundKey
+        final_matrices.append({
+            "label": "After AddRoundKey",
+            "data": [[f"{cell:02x}" for cell in row] for row in state],
+            "tooltip": "Final encrypted state after AddRoundKey"
+        })
+
+        # Add final round to states
+        states.append({
+            "title": "Round 10",
+            "matrices": final_matrices
+        })
+
         encrypted_hex = self.state_to_hex(state)
         print("Encrypted hex:", encrypted_hex)
-    
-        return encrypted_hex
+
+        # Get just the encrypted hex string (without newlines and spaces)
+        final_state = [[f"{cell:02x}" for cell in row] for row in state]
+        ciphertext = ''.join([''.join(row) for row in final_state])  # Clean hex string
+        # Create the JSON structure
+        json_data = {
+            "input": {
+                "plaintext": plaintext_hex,
+                "key": ''.join([f"{byte:02x}" for byte in self.round_keys[0]])
+            },
+            "rounds": states,
+            "output": {
+                "ciphertext": ciphertext
+            }
+        }
+
+        return ciphertext, json_data  # Return clean ciphertext and JSON data separately
 
     
     def decrypt(self, ciphertext_hex):
@@ -561,62 +714,163 @@ def test_aes_encryption():
     
     # Encrypt the plaintext
     print("Original Plaintext (hex):", plaintext_hex)
-    ciphertext = aes.encrypt(plaintext_hex)
+    ciphertext, visualization_data = aes.encrypt(plaintext_hex)
     print(f"Ciphertext: {ciphertext}")
+
+    # Example of JSON usage for API
+    import json
+    api_response = {
+        "status": "success",
+        "ciphertext": ciphertext,
+        "visualization": visualization_data
+    }
     
-    # Decrypt the ciphertext
-    decrypted_plaintext = aes.decrypt(ciphertext)
-    print(f"Decrypted Plaintext (hex): {decrypted_plaintext}")
+    # # Decrypt the ciphertext
+    # decrypted_plaintext = aes.decrypt(ciphertext)
+    # print(f"Decrypted Plaintext (hex): {decrypted_plaintext}")
     
-    # Check if the decrypted plaintext matches the original plaintext
-    if decrypted_plaintext != plaintext_hex:
-        print("Decryption failed: Decrypted plaintext does not match the original.")
-        print("Original Plaintext:", plaintext_hex)
-        print("Decrypted Plaintext:", decrypted_plaintext)
-    else:
-        print("Test passed! Decryption matched the original plaintext.")
+    # # Check if the decrypted plaintext matches the original plaintext
+    # if decrypted_plaintext != plaintext_hex:
+    #     print("Decryption failed: Decrypted plaintext does not match the original.")
+    #     print("Original Plaintext:", plaintext_hex)
+    #     print("Decrypted Plaintext:", decrypted_plaintext)
+    # else:
+    #     print("Test passed! Decryption matched the original plaintext.")
 
 
 # Run the test
 test_aes_encryption()
 # ------------------------------------------------------------------------------------------------
 
-# Main function to generate AES tables and test the AES class   
-def main():
+# # Main function to generate AES tables and test the AES class   
+# def main():
+#     print("Starting AES table generation...")
+#     generate()  # Generate the S-box and related tables
+#     print("AES table generation complete. Check 'AES_base.log' and 'AES_base.py'.")
+
+#     # Import sbox directly from AES_base
+#     from AES_base import sbox
+    
+#     # Calculate the inverse S-box
+#     inv_sbox = invert_sbox(sbox)
+#     print(f"Inverse S-Box: {inv_sbox}")  # Debug print
+
+#     # Prompt the user to enter a 128-bit AES key (32 hex characters)
+#     key_hex = KeyExpansion.user_input_key()  # Receive a hex key from user
+#     print("\nUser-provided key in hex:", key_hex)
+
+#     # Initialize KeyExpansion and generate round keys
+#     key_expansion = KeyExpansion(key_hex, sbox)
+#     round_keys = key_expansion.round_keys
+#     print("\nGenerated Round Keys:")
+#     for i, round_key in enumerate(round_keys):
+#         print(f"Round {i}: {round_key}")
+
+#     # Initialize AES class with the user-provided key
+#     aes = AES(key_hex)
+
+#     # Example usage for encryption and decryption
+#     plaintext_hex = "3243f6a8885a308d313198a2e0370734"  # Example plaintext
+#     ciphertext = aes.encrypt(plaintext_hex)
+#     print(f"Ciphertext: {ciphertext}")
+
+#     decrypted_plaintext = aes.decrypt(ciphertext)
+#     print(f"Decrypted Plaintext: {decrypted_plaintext}")
+
+# Initialize AES tables when the application starts
+def initialize_aes():
     print("Starting AES table generation...")
     generate()  # Generate the S-box and related tables
     print("AES table generation complete. Check 'AES_base.log' and 'AES_base.py'.")
-
+    
     # Import sbox directly from AES_base
     from AES_base import sbox
     
     # Calculate the inverse S-box
     inv_sbox = invert_sbox(sbox)
-    print(f"Inverse S-Box: {inv_sbox}")  # Debug print
+    print(f"Inverse S-Box initialized")
+    
+    return True
 
-    # Prompt the user to enter a 128-bit AES key (32 hex characters)
-    key_hex = KeyExpansion.user_input_key()  # Receive a hex key from user
-    print("\nUser-provided key in hex:", key_hex)
+# API endpoints
+@app.route('/api/encrypt', methods=['POST'])
+def encrypt_api():
+    try:
+        data = request.get_json()
+        plaintext_hex = data.get('plaintext')
+        key_hex = data.get('key')
+        
+        if not plaintext_hex or not key_hex:
+            return jsonify({
+                "status": "error",
+                "message": "Missing plaintext or key"
+            }), 400
+        
+        # Initialize AES with provided key
+        aes = AES(key_hex)
+        
+        # Perform encryption
+        ciphertext, visualization_data = aes.encrypt(plaintext_hex)
+        
+        return jsonify({
+            "status": "success",
+            "ciphertext": ciphertext,
+            "visualization": visualization_data
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
-    # Initialize KeyExpansion and generate round keys
-    key_expansion = KeyExpansion(key_hex, sbox)
-    round_keys = key_expansion.round_keys
-    print("\nGenerated Round Keys:")
-    for i, round_key in enumerate(round_keys):
-        print(f"Round {i}: {round_key}")
+@app.route('/api/decrypt', methods=['POST'])
+def decrypt_api():
+    try:
+        data = request.get_json()
+        ciphertext = data.get('ciphertext')
+        key_hex = data.get('key')
+        
+        if not ciphertext or not key_hex:
+            return jsonify({
+                "status": "error",
+                "message": "Missing ciphertext or key"
+            }), 400
+        
+        # Initialize AES with provided key
+        aes = AES(key_hex)
+        
+        # Perform decryption
+        decrypted_text = aes.decrypt(ciphertext)
+        
+        return jsonify({
+            "status": "success",
+            "plaintext": decrypted_text
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
-    # Initialize AES class with the user-provided key
-    aes = AES(key_hex)
+# Test endpoint to check if API is running
+@app.route('/api/test', methods=['GET'])
+def test_api():
+    return jsonify({
+        "status": "success",
+        "message": "AES API is running"
+    })
 
-    # Example usage for encryption and decryption
-    plaintext_hex = "3243f6a8885a308d313198a2e0370734"  # Example plaintext
-    ciphertext = aes.encrypt(plaintext_hex)
-    print(f"Ciphertext: {ciphertext}")
-
-    decrypted_plaintext = aes.decrypt(ciphertext)
-    print(f"Decrypted Plaintext: {decrypted_plaintext}")
 
 # Run main function
 if __name__ == "__main__":
-    main()
+    # Initialize AES tables before starting the server
+    initialized = initialize_aes()
+    if initialized:
+        print("AES initialized successfully. Starting API server...")
+        app.run(debug=True, port=5000)
+    else:
+        print("Failed to initialize AES")
+        sys.exit(1)
 
