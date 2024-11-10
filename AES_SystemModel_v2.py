@@ -20,7 +20,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Each value represents a power of x in GF(2^8)
 rcon = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36]
 
-class BinPol:
+class BinPol: # BinPol author: github.com/pcaro90 / modified by: EBranigan
     """
     Binary polynomial representation for finite field arithmetic in GF(2^8).
     Used for AES table generation and field operations.
@@ -233,7 +233,7 @@ def invert_sbox(sbox):
         inv_sbox[sbox[i]] = i
     return inv_sbox
 
-class KeyExpansion:
+class KeyExpansion: # author: EBranigan
     """
     Handles AES key expansion to generate round keys.
     Implements the key schedule for AES-128.
@@ -292,7 +292,7 @@ class KeyExpansion:
 
 
 
-class MixColumns:
+class MixColumns: # author: E_Saji   
     """
     Implements MixColumns and InvMixColumns transformations for AES.
     These operations provide diffusion in the cipher.
@@ -382,7 +382,7 @@ class MixColumns:
         
         return [[new_state[row][col] for row in range(4)] for col in range(4)]
 
-class SubBytes:
+class SubBytes: # author: V_Mendy   
     """
     Implements SubBytes and InvSubBytes transformations.
     Provides non-linearity in the cipher.
@@ -422,7 +422,7 @@ class SubBytes:
                 state[i][j] = inv_sbox[state[i][j]]
         return state
 
-class ShiftRows:
+class ShiftRows: # author: E_Saji
     """
     Implements ShiftRows and InvShiftRows transformations.
     Provides diffusion by shifting rows of the state matrix.
@@ -458,7 +458,7 @@ class ShiftRows:
             state[r] = state[r][-r:] + state[r][:-r]
         return state
 
-class AddRoundKey:
+class AddRoundKey: # author: V_Mendy    
     """
     Implements the AddRoundKey transformation.
     Provides key mixing in the cipher.
@@ -489,7 +489,7 @@ class AddRoundKey:
         
         return state
     
-class HexConverter:
+class HexConverter: # author: V_Mendy
     """
     Provides utilities for converting between text and hex representations.
     Handles padding and formatting for AES block size requirements.
@@ -534,7 +534,7 @@ class HexConverter:
         except ValueError:
             return ''
 
-class AES:
+class AES: # authors: EBranigan, V_Mendy, E_Saji    
     """
     Main AES cipher implementation class.
     Handles encryption, decryption, and state visualization.
@@ -890,7 +890,8 @@ class AES:
         except Exception as e:
             return None, {"error": f"Decryption failed: {str(e)}"}
 
-# Flask API routes
+# ------------------------------------------------------------------------------------------------  
+# Flask API routes - authors: V_Mendy (UI implementation and visuals), EBranigan (base code)
 def initialize_aes():
     """
     Initializes AES system by generating necessary tables.

@@ -1,6 +1,4 @@
-# AES_SystemModelv2.py
-
-# AES
+# AES_SystemModelv4_UpdatedMain.py
 
 import sys
 import os
